@@ -23,6 +23,10 @@ param_labels <- c(
   diffusion_coef = "Diffusion coefficient (m^2/s)"
 )
 
+# Hazard thresholds (kg/m^2) -- Wilson et al. (2014), Jenkins et al. (2015). Drawn as reference
+# lines on the OAT and tornado plots, matching tephra2_sensitivity.ipynb.
+hazard_thresholds <- c(1, 10, 100, 1000)
+
 # ---------------------------------------------------------------------------
 # Load the three OAT sweeps
 # ---------------------------------------------------------------------------
@@ -48,6 +52,10 @@ plot_oat <- function(param_name) {
   use_log_x <- x_range_ratio > 10
 
   p <- ggplot(df_long, aes(x = .data[[param_name]], y = mass_kg_m2, color = location)) +
+    geom_hline(yintercept = hazard_thresholds, color = "gray50", linetype = "dotted", linewidth = 0.4) +
+    annotate("text", x = max(df[[param_name]]), y = hazard_thresholds,
+             label = paste0(hazard_thresholds, " kg/m^2"), hjust = 1, vjust = -0.3,
+             size = 2.5, color = "gray40") +
     geom_line(linewidth = 0.6) +
     geom_point(size = 1.2) +
     scale_y_log10() +
@@ -114,6 +122,7 @@ tornado_data <- sensitivity_summary %>%
 tornado_data$parameter <- factor(tornado_data$parameter, levels = tornado_data$parameter)
 
 p_tornado <- ggplot(tornado_data, aes(y = parameter)) +
+  geom_vline(xintercept = hazard_thresholds, color = "gray50", linetype = "dotted", linewidth = 0.4) +
   geom_segment(aes(x = min_mass_kg_m2, xend = max_mass_kg_m2, yend = parameter),
                linewidth = 10, color = "#d95f02", alpha = 0.75, lineend = "butt") +
   scale_x_log10() +
